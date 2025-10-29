@@ -93,12 +93,3 @@ Open **DevTools → Console** to watch the timer:
 This confirms timing is progressing as expected.
 
 ---
-
-If you'd like, I can also generate:
-✅ A version with audio cue transitions
-✅ A version that logs timestamps to a server / Firestore
-✅ A version that syncs phase timing to EEG triggers
-
-Just tell me your recording setup.
-
-
