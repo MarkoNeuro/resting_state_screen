@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resting State – Center Cross</title>
+  <style>
+    :root{
+      /* Defaults: white bg, black cross */
+      --bg: #ffffff;
+      --cross-color: #000000;
+      /* size is the arm length of the cross, in vmin */
+      --cross-size: 20vmin;   
+      --cross-thickness: 4px; 
+      --cursor: none;         /* hide cursor for clean display */
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      cursor: var(--cursor);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Prevent selecting or dragging */
+    * { user-select: none; -webkit-user-select: none; }
+
+    .stage {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+    }
+
+    .cross {
+      position: relative;
+      width: var(--cross-size);
+      height: var(--cross-size);
+    }
+
+    /* Horizontal bar */
+    .cross::before,
+    /* Vertical bar */
+    .cross::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--cross-color);
+    }
+
+    .cross::before {
+      width: var(--cross-size);
+      height: var(--cross-thickness);
+    }
+
+    .cross::after {
+      width: var(--cross-thickness);
+      height: var(--cross-size);
+    }
+
+    /* Optional: soft pixel snapping to keep lines crisp on odd DPRs */
+    @media (min-resolution: 2dppx) {
+      .cross::before, .cross::after { filter: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" aria-hidden="true">
+    <div class="cross"></div>
+  </div>
+
+  <script>
+    // Allow quick customization via URL params.
+    // Example: ?size=15&thickness=3&color=%23000000&bg=%23ffffff&cursor=auto
+    (function(){
+      const params = new URLSearchParams(location.search);
+      const setVar = (name, cssVar, transform) => {
+        if (!params.has(name)) return;
+        const raw = params.get(name);
+        const val = transform ? transform(raw) : raw;
+        if (val != null) document.documentElement.style.setProperty(cssVar, val);
+      };
+
+      setVar('bg', '--bg');
+      setVar('color', '--cross-color');
+
+      // size in vmin (number -> `${n}vmin`)
+      setVar('size', '--cross-size', n => `${parseFloat(n)||20}vmin`);
+      // thickness in px (number -> `${n}px`)
+      setVar('thickness', '--cross-thickness', n => `${parseFloat(n)||4}px`);
+
+      // cursor control: "none" (default) or "auto"
+      setVar('cursor', '--cursor');
+
+      // Optionally allow hex without leading '#': e.g., color=000000
+      ['bg','color'].forEach(key => {
+        const v = params.get(key);
+        if (v && /^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)){
+          document.documentElement.style.setProperty(key==='bg'?'--bg':'--cross-color', `#${v}`);
+        }
+      });
+
+      // Fullscreen helper if you append &fs=1
+      if (params.get('fs') === '1') {
+        const goFS = () => {
+          const el = document.documentElement;
+          if (el.requestFullscreen) el.requestFullscreen();
+        };
+        // try immediately; also on first interaction (required by some browsers)
+        goFS();
+        addEventListener('pointerdown', goFS, { once: true });
+        addEventListener('keydown', goFS, { once: true });
+      }
+    })();
+  </script>
+</body>
+</html>
