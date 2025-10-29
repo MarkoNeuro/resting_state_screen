@@ -2,81 +2,103 @@
 screen for resting state neuroimaging
 Resting-State Cross (HTML + PNG)
 
-This repo provides:
+# Resting-State Sequence (Staged Timing)
 
-rest.html – A self-contained HTML page that renders a white background with a centered fixation cross. You can tweak it via URL parameters.
+This repository provides a **controlled resting-state sequence** with automatic fullscreen, fixation display, staged instructions, a blank period, and a final end screen.
 
-cross.png – A high-resolution (2048×2048) PNG with a white background and a black plus-shaped fixation cross, suitable for preloading in game engines or experimental frameworks.
+## Display Sequence
 
-Quick Start (GitHub Pages)
+| Phase                 | Duration (Default) | Display                               | Description                                            |
+| --------------------- | ------------------ | ------------------------------------- | ------------------------------------------------------ |
+| 1. Fixation cross     | **150s** (2.5 min) | Centered + cross                      | Participant keeps eyes open and stays still.           |
+| 2. Instruction        | **30s**            | "Now please close your eyes and rest" | Participant closes eyes and relaxes.                   |
+| 3. Blank white screen | **120s** (2 min)   | White screen only                     | Participant rests with closed eyes.                    |
+| 4. End screen         | Until user closes  | "END"                                 | Signals completion and automatically exits fullscreen. |
 
-Create a new GitHub repository (e.g., rest-cross).
+A **debug timer** logs current phase, elapsed time, and remaining time in the browser console.
 
-Upload these files to the root of the repo:
+---
 
-rest.html
+## Files Included
 
-cross.png
+* `index.html` — The **staged resting-state sequence** (fullscreen by default).
+* `cross.png` (optional) — High-resolution fixation cross image if needed elsewhere.
 
-README.md (this file)
+---
 
-Go to Settings → Pages:
+## GitHub Pages Deployment
 
-Source: “Deploy from a branch”
+1. Upload the files to your repository root.
+2. Go to **Settings → Pages**.
+3. Set **Source** to `main` (root).
+4. Visit:
 
-Branch: main (root)
+   ```
+   https://<your-username>.github.io/<repository-name>/
+   ```
 
-After it builds, your page will be available at:
+Example:
 
-https://<your-username>.github.io/rest-cross/rest.html
+```
+https://markoneuro.github.io/rest-cross/
+```
 
-Use in your experiment
+---
 
-As a page (fullscreen or iframe):
+## URL Customization Parameters
 
-<iframe
-  src="https://<your-username>.github.io/rest-cross/rest.html?size=20&thickness=4&color=%23000000&bg=%23ffffff"
-  style="position:fixed; inset:0; width:100%; height:100%; border:0;"
-  allow="fullscreen">
-</iframe>
+You can override durations or colors via URL parameters:
 
-As an image asset:
-Preload cross.png and display centered on a white stage. The asset has a large resolution so it looks crisp on high-DPI displays.
+| Param       | Meaning                | Units      | Default   |
+| ----------- | ---------------------- | ---------- | --------- |
+| `d1`        | Fixation duration      | seconds    | `150`     |
+| `d2`        | Instruction duration   | seconds    | `30`      |
+| `d3`        | Blank white duration   | seconds    | `120`     |
+| `bg`        | Background color       | hex or rgb | `#ffffff` |
+| `color`     | Cross color            | hex or rgb | `#000000` |
+| `text`      | Instruction text color | hex or rgb | `#000000` |
+| `size`      | Cross arm length       | vmin       | `16`      |
+| `thickness` | Cross stroke width     | px         | `4`       |
 
-rest.html – URL Parameters
+### Example (short test version):
 
-size – arm length of cross in vmin, default 20
+```
+https://<your-username>.github.io/<repo>/?d1=5&d2=3&d3=4
+```
 
-thickness – bar thickness in px, default 4
+### Example (dark cross on white):
 
-color – cross color (hex), default black; URL-encode # as %23
+```
+?color=000000&bg=ffffff
+```
 
-bg – background color (hex), default white
+---
 
-cursor – none (default) or auto
+## Notes
 
-fs – 1 to request fullscreen on first user interaction
+* Fullscreen is **requested automatically**, but browser security may require the first click or key press — the script handles this.
+* Cursor is hidden by default; use `?cursor=auto` to show it.
+* Phase progression does not depend on user input.
 
-Examples:
+---
 
-Default white bg + black cross:.../rest.html?size=20&thickness=4&color=%23000000&bg=%23ffffff
+## Debugging
 
-Thin cross, cursor visible:.../rest.html?size=20&thickness=2&cursor=auto
+Open **DevTools → Console** to watch the timer:
 
-Dark room:.../rest.html?size=18&thickness=3&color=%23ffffff&bg=%23222222
+```
+[rest] phase=1 (fixation), elapsed=12s, remaining=138s
+```
 
-File tree
+This confirms timing is progressing as expected.
 
-rest-cross/
-├─ rest.html
-├─ cross.png
-└─ README.md
+---
 
-Notes
+If you'd like, I can also generate:
+✅ A version with audio cue transitions
+✅ A version that logs timestamps to a server / Firestore
+✅ A version that syncs phase timing to EEG triggers
 
-The PNG cross is a plus sign (+) (standard fixation cross), with bar thickness ≈ 4% of the image size and arm length ≈ 60% of the canvas dimension.
+Just tell me your recording setup.
 
-rest.html hides the cursor by default; set cursor=auto if you need to see it.
-
-For strict visual consistency across monitors, prefer the PNG. For responsive layouts and quick tweaks, prefer the HTML page.
 
