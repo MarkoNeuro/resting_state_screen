@@ -3,70 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Resting State – Center Cross</title>
+  <title>Resting State – Center Cross (Fullscreen + 5 min auto-off)</title>
   <style>
     :root{
-      /* Defaults: white bg, black cross */
-      --bg: #ffffff;
-      --cross-color: #000000;
-      /* size is the arm length of the cross, in vmin */
-      --cross-size: 20vmin;   
-      --cross-thickness: 4px; 
-      --cursor: none;         /* hide cursor for clean display */
+      --bg: #ffffff;            /* background while on */
+      --cross-color: #000000;   /* cross color */
+      --cross-size: 20vmin;     /* arm length */
+      --cross-thickness: 4px;   /* bar thickness */
+      --cursor: none;           /* hide cursor */
     }
-
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      cursor: var(--cursor);
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* Prevent selecting or dragging */
+    html, body { height: 100%; margin: 0; background: var(--bg); cursor: var(--cursor); }
     * { user-select: none; -webkit-user-select: none; }
-
-    .stage {
-      position: fixed;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      background: var(--bg);
-    }
-
-    .cross {
-      position: relative;
-      width: var(--cross-size);
-      height: var(--cross-size);
-    }
-
-    /* Horizontal bar */
-    .cross::before,
-    /* Vertical bar */
-    .cross::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--cross-color);
-    }
-
-    .cross::before {
-      width: var(--cross-size);
-      height: var(--cross-thickness);
-    }
-
-    .cross::after {
-      width: var(--cross-thickness);
-      height: var(--cross-size);
-    }
-
-    /* Optional: soft pixel snapping to keep lines crisp on odd DPRs */
-    @media (min-resolution: 2dppx) {
-      .cross::before, .cross::after { filter: none; }
-    }
+    .stage { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); }
+    .cross { position: relative; width: var(--cross-size); height: var(--cross-size); }
+    .cross::before, .cross::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--cross-color); }
+    .cross::before { width: var(--cross-size); height: var(--cross-thickness); }
+    .cross::after  { width: var(--cross-thickness); height: var(--cross-size); }
   </style>
 </head>
 <body>
@@ -75,8 +27,7 @@
   </div>
 
   <script>
-    // Allow quick customization via URL params.
-    // Example: ?size=15&thickness=3&color=%23000000&bg=%23ffffff&cursor=auto
+    // Fullscreen by default + invisible timer to auto turn off after 5 minutes.
     (function(){
       const params = new URLSearchParams(location.search);
       const setVar = (name, cssVar, transform) => {
@@ -86,18 +37,14 @@
         if (val != null) document.documentElement.style.setProperty(cssVar, val);
       };
 
+      // Allow quick customization via URL params
       setVar('bg', '--bg');
       setVar('color', '--cross-color');
-
-      // size in vmin (number -> `${n}vmin`)
       setVar('size', '--cross-size', n => `${parseFloat(n)||20}vmin`);
-      // thickness in px (number -> `${n}px`)
       setVar('thickness', '--cross-thickness', n => `${parseFloat(n)||4}px`);
-
-      // cursor control: "none" (default) or "auto"
       setVar('cursor', '--cursor');
 
-      // Optionally allow hex without leading '#': e.g., color=000000
+      // Hex without '#'
       ['bg','color'].forEach(key => {
         const v = params.get(key);
         if (v && /^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v)){
@@ -105,18 +52,37 @@
         }
       });
 
-      // Fullscreen helper if you append &fs=1
-      if (params.get('fs') === '1') {
-        const goFS = () => {
-          const el = document.documentElement;
-          if (el.requestFullscreen) el.requestFullscreen();
-        };
-        // try immediately; also on first interaction (required by some browsers)
-        goFS();
-        addEventListener('pointerdown', goFS, { once: true });
-        addEventListener('keydown', goFS, { once: true });
+      // Duration (seconds) and off-state color
+      const durationSec = (() => {
+        const v = parseFloat(params.get('duration'));
+        return Number.isFinite(v) && v >= 0 ? v : 300; // default 5 minutes
+      })();
+      const offColor = params.get('off') || '#000000'; // default to black screen
+
+      // Always attempt to go fullscreen (most browsers require user gesture, so also add fallbacks)
+      const goFS = () => {
+        const el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+      };
+      goFS();
+      addEventListener('pointerdown', goFS, { once: true });
+      addEventListener('keydown', goFS, { once: true });
+
+      // Invisible one-shot timer
+      function turnOff(){
+        // Remove the fixation cross and set background to offColor
+        const stage = document.querySelector('.stage');
+        if (stage) stage.remove();
+        document.documentElement.style.setProperty('--bg', offColor);
+        document.body.style.background = offColor;
+        // Optionally exit fullscreen
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(()=>{});
+        }
       }
+      setTimeout(turnOff, Math.round(durationSec * 1000));
     })();
   </script>
 </body>
 </html>
+
