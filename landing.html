@@ -34,187 +34,103 @@
     input:invalid { border-color: #ef4444; }
     .error { color: #b91c1c; font-size: .8rem; display: none; }
     .full { grid-column: 1 / -1; }
-    .actions { margin-top: 1rem; display: flex; gap: .75rem; flex-wrap: wrap; }
-    button, a.button {
+    button {
       appearance: none; border: 0; border-radius: 12px; padding: .8rem 1.1rem;
-      font-weight: 600; cursor: pointer; background: #0ea5e9; color: white; text-decoration: none;
+      font-weight: 600; cursor: pointer; background: #0ea5e9; color: white;
+      text-align: center; width: 100%; margin-top: 1rem;
     }
-    .secondary { background: #e5e7eb; color: #111; }
     .hint { font-size: .85rem; color: #666; }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>Resting-State – Configure & Start</h1>
-    <p class="hint">Set durations (seconds), pick the visual variant, and cross size. Values are validated and remembered on this device.</p>
 
     <form id="cfg" class="grid" novalidate>
-      <!-- Durations -->
       <div class="row">
-        <label for="d1">Part 1 – Fixation (<span class="hint">seconds</span>)</label>
-        <input id="d1" name="d1" type="number" min="1" step="1" required />
-        <div class="error" id="err_d1">Please enter a positive number of seconds.</div>
+        <label for="d1">Fixation Duration (sec)</label>
+        <input id="d1" type="number" min="1" required>
+        <div class="error" id="err_d1">Enter a positive number</div>
       </div>
 
       <div class="row">
-        <label for="inter">Interval (text visible) (<span class="hint">seconds</span>)</label>
-        <input id="inter" name="inter" type="number" min="0" step="1" required />
-        <div class="error" id="err_inter">Please enter 0 or more seconds.</div>
+        <label for="inter">Interval Text Duration (sec)</label>
+        <input id="inter" type="number" min="0" required>
+        <div class="error" id="err_inter">Enter ≥ 0</div>
       </div>
 
       <div class="row full">
-        <label for="d2">Part 2 – Blank screen (<span class="hint">seconds</span>)</label>
-        <input id="d2" name="d2" type="number" min="1" step="1" required />
-        <div class="error" id="err_d2">Please enter a positive number of seconds.</div>
+        <label for="d2">Blank Screen Duration (sec)</label>
+        <input id="d2" type="number" min="1" required>
+        <div class="error" id="err_d2">Enter a positive number</div>
       </div>
 
-      <!-- Visuals -->
       <div class="row">
         <label for="variant">Variant</label>
-        <select id="variant" name="variant">
-          <option value="white">White background, black cross/text</option>
-          <option value="black">Black background, white cross/text</option>
+        <select id="variant">
+          <option value="white">White background</option>
+          <option value="black">Black background</option>
         </select>
       </div>
 
       <div class="row">
-        <label for="size">Cross size (<span class="hint">vmin</span>)</label>
-        <input id="size" name="size" type="number" min="1" step="0.1" required />
-        <div class="error" id="err_size">Please enter a positive size (vmin).</div>
+        <label for="size">Cross Size (vmin)</label>
+        <input id="size" type="number" min="1" step="0.1" required>
+        <div class="error" id="err_size">Enter > 0</div>
       </div>
 
       <div class="row">
-        <label for="thickness">Cross thickness (<span class="hint">px</span>)</label>
-        <input id="thickness" name="thickness" type="number" min="1" step="1" required />
-        <div class="error" id="err_thickness">Please enter a positive thickness (px).</div>
+        <label for="thickness">Cross Thickness (px)</label>
+        <input id="thickness" type="number" min="1" required>
+        <div class="error" id="err_thickness">Enter > 0</div>
       </div>
 
       <div class="row">
         <label for="cursor">Cursor</label>
-        <select id="cursor" name="cursor">
+        <select id="cursor">
           <option value="none">Hidden</option>
           <option value="auto">Visible</option>
         </select>
       </div>
 
-      <div class="row full">
-        <label for="baseUrl">Runner page URL</label>
-        <input id="baseUrl" type="url" required />
-        <div class="error" id="err_base">Please provide a valid URL (e.g., <code>./run.html</code>).</div>
-        <p class="hint">This should point to your runner page (default: <code>./run.html</code> in this repo).</p>
-      </div>
-
-      <div class="actions full">
-        <button type="submit">Start Resting State</button>
-        <button type="button" class="secondary" id="previewBtn">Preview URL</button>
-        <a id="urlOut" class="button secondary" href="#" target="_blank" rel="noopener noreferrer">Open in new tab</a>
-      </div>
+      <button type="submit">Start</button>
     </form>
   </div>
 
   <script>
-    const DEFAULTS = {
-      d1: 150,       // fixation
-      inter: 5,      // interval text
-      d2: 120,       // blank
-      variant: 'white',
-      size: 16,
-      thickness: 4,
-      cursor: 'none',
-      baseUrl: './index.html'
-    };
     const KEY = 'rest-landing-v1';
+    const DEFAULTS = { d1:150, inter:5, d2:120, variant:'white', size:16, thickness:4, cursor:'none' };
 
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(KEY);
-        return raw ? JSON.parse(raw) : { ...DEFAULTS };
-      } catch { return { ...DEFAULTS }; }
+    function load() {
+      try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY)) }; }
+      catch { return { ...DEFAULTS }; }
     }
-    function saveState(state) {
-      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
-    }
-    function getFormValues() {
-      const f = document.getElementById('cfg');
-      return {
-        d1: Number(f.d1.value),
-        inter: Number(f.inter.value),
-        d2: Number(f.d2.value),
-        variant: f.variant.value,
-        size: Number(f.size.value),
-        thickness: Number(f.thickness.value),
-        cursor: f.cursor.value,
-        baseUrl: document.getElementById('baseUrl').value
-      };
-    }
-    function setFormValues(v) {
-      const f = document.getElementById('cfg');
-      f.d1.value = v.d1;
-      f.inter.value = v.inter;
-      f.d2.value = v.d2;
-      f.variant.value = v.variant;
-      f.size.value = v.size;
-      f.thickness.value = v.thickness;
-      f.cursor.value = v.cursor;
-      document.getElementById('baseUrl').value = v.baseUrl;
-    }
+    function save(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} }
+
+    const s = load();
+    d1.value=s.d1; inter.value=s.inter; d2.value=s.d2;
+    variant.value=s.variant; size.value=s.size; thickness.value=s.thickness; cursor.value=s.cursor;
+
     function validate() {
-      const v = getFormValues();
       let ok = true;
-
-      const show = (id, cond) => { const el = document.getElementById(id); el.style.display = cond ? 'block' : 'none'; };
-
-      if (!(Number.isFinite(v.d1) && v.d1 > 0)) { ok = false; show('err_d1', true); } else show('err_d1', false);
-      if (!(Number.isFinite(v.inter) && v.inter >= 0)) { ok = false; show('err_inter', true); } else show('err_inter', false);
-      if (!(Number.isFinite(v.d2) && v.d2 > 0)) { ok = false; show('err_d2', true); } else show('err_d2', false);
-      if (!(Number.isFinite(v.size) && v.size > 0)) { ok = false; show('err_size', true); } else show('err_size', false);
-      if (!(Number.isFinite(v.thickness) && v.thickness > 0)) { ok = false; show('err_thickness', true); } else show('err_thickness', false);
-      try { new URL(v.baseUrl, location.href); show('err_base', false); } catch { ok = false; show('err_base', true); }
-
+      const show = (id,b)=>{document.getElementById(id).style.display=b?'block':'none'};
+      if(d1.value<=0){ok=false;show('err_d1',true);} else show('err_d1',false);
+      if(inter.value<0){ok=false;show('err_inter',true);} else show('err_inter',false);
+      if(d2.value<=0){ok=false;show('err_d2',true);} else show('err_d2',false);
+      if(size.value<=0){ok=false;show('err_size',true);} else show('err_size',false);
+      if(thickness.value<=0){ok=false;show('err_thickness',true);} else show('err_thickness',false);
       return ok;
     }
-    function buildUrl() {
-      const v = getFormValues();
-      const url = new URL(v.baseUrl, location.href);
-      const p = url.searchParams;
-      p.set('d1', String(v.d1));
-      p.set('inter', String(v.inter));
-      p.set('d2', String(v.d2));
-      p.set('variant', v.variant);
-      p.set('size', String(v.size));
-      p.set('thickness', String(v.thickness));
-      p.set('cursor', v.cursor);
-      return url.toString();
-    }
 
-    // init
-    const state = loadState();
-    setFormValues(state);
-
-    // persist on change
-    document.getElementById('cfg').addEventListener('input', () => {
-      const v = getFormValues();
-      saveState(v);
-    });
-
-    // Start
-    document.getElementById('cfg').addEventListener('submit', (e) => {
+    cfg.addEventListener('submit', e=>{
       e.preventDefault();
-      if (!validate()) return;
-      const v = getFormValues();
-      saveState(v);
-      window.location.href = buildUrl(); // same tab
-    });
-
-    // Preview
-    document.getElementById('previewBtn').addEventListener('click', () => {
-      if (!validate()) return;
-      const v = getFormValues();
-      saveState(v);
-      const a = document.getElementById('urlOut');
-      a.href = buildUrl();
-      a.textContent = 'Open configured run';
+      if(!validate()) return;
+      const v={d1:+d1.value, inter:+inter.value, d2:+d2.value, variant:variant.value, size:+size.value, thickness:+thickness.value, cursor:cursor.value};
+      save(v);
+      const url=`./index.html?d1=${v.d1}&inter=${v.inter}&d2=${v.d2}&variant=${v.variant}&size=${v.size}&thickness=${v.thickness}&cursor=${v.cursor}`;
+      window.location.href = url;
     });
   </script>
 </body>
 </html>
+
