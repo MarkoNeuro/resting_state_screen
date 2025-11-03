@@ -2,94 +2,107 @@
 screen for resting state neuroimaging
 Resting-State Cross (HTML + PNG)
 
-# Resting-State Sequence (Staged Timing)
+# Resting-State Task (Configurable Landing + Automatic Runner)
 
-This repository provides a **controlled resting-state sequence** with automatic fullscreen, fixation display, staged instructions, a blank period, and a final end screen.
-
-## Display Sequence
-
-| Phase                 | Duration (Default) | Display                               | Description                                            |
-| --------------------- | ------------------ | ------------------------------------- | ------------------------------------------------------ |
-| 1. Fixation cross     | **150s** (2.5 min) | Centered + cross                      | Participant keeps eyes open and stays still.           |
-| 2. Instruction        | **30s**            | "Now please close your eyes and rest" | Participant closes eyes and relaxes.                   |
-| 3. Blank white screen | **120s** (2 min)   | White screen only                     | Participant rests with closed eyes.                    |
-| 4. End screen         | Until user closes  | "END"                                 | Signals completion and automatically exits fullscreen. |
-
-A **debug timer** logs current phase, elapsed time, and remaining time in the browser console.
+This repository provides a simple, browser-based resting-state display used for behavioral, EEG, MEG, or fMRI experiments. It allows the experimenter to configure timing and visual parameters before starting.
 
 ---
 
-## Files Included
+## Overview
 
-* `index.html` — The **staged resting-state sequence** (fullscreen by default).
-* `cross.png` (optional) — High-resolution fixation cross image if needed elsewhere.
+### The sequence presented to the participant:
 
----
+| Phase | Display | Default Duration | Description |
+|------|---------|-----------------|-------------|
+| **1. Fixation** | Centered cross | 150 seconds | Participant looks at the cross and relaxes. |
+| **2. Interval (Instruction Text)** | “Now please close your eyes and rest” | 5 seconds | Participant prepares to close eyes. |
+| **3. Rest (Eyes closed)** | Blank screen (white or black) | 150 seconds | Participant rests without visual input. |
+| **4. End Screen** | “END” | Until escape | Signals the end of the resting period, fullscreen exits. |
 
-## GitHub Pages Deployment
-
-1. Upload the files to your repository root.
-2. Go to **Settings → Pages**.
-3. Set **Source** to `main` (root).
-4. Visit:
-
-   ```
-   https://<your-username>.github.io/<repository-name>/
-   ```
-
-Example:
-
-```
-https://markoneuro.github.io/rest-cross/
-```
+The entire flow runs **automatically** once started.
 
 ---
 
-## URL Customization Parameters
+## Files
 
-You can override durations or colors via URL parameters:
+index.html → Landing page (configuration UI)
+run.html → Runner page (displays the timed sequence)
+cross.png → Optional cross image asset (not required by the default renderer)
+README.md → Documentation (this file)
 
-| Param       | Meaning                | Units      | Default   |
-| ----------- | ---------------------- | ---------- | --------- |
-| `d1`        | Fixation duration      | seconds    | `150`     |
-| `d2`        | Instruction duration   | seconds    | `30`      |
-| `d3`        | Blank white duration   | seconds    | `120`     |
-| `bg`        | Background color       | hex or rgb | `#ffffff` |
-| `color`     | Cross color            | hex or rgb | `#000000` |
-| `text`      | Instruction text color | hex or rgb | `#000000` |
-| `size`      | Cross arm length       | vmin       | `16`      |
-| `thickness` | Cross stroke width     | px         | `4`       |
-
-### Example (short test version):
-
-```
-https://<your-username>.github.io/<repo>/?d1=5&d2=3&d3=4
-```
-
-### Example (dark cross on white):
-
-```
-?color=000000&bg=ffffff
-```
+yaml
+Copy code
 
 ---
 
-## Notes
+## Landing Page (index.html)
 
-* Fullscreen is **requested automatically**, but browser security may require the first click or key press — the script handles this.
-* Cursor is hidden by default; use `?cursor=auto` to show it.
-* Phase progression does not depend on user input.
+The landing page lets you configure:
+
+| Setting | Description | Default |
+|--------|-------------|---------|
+| Fixation duration (d1) | Duration of cross display | 150 s |
+| Interval duration (inter) | Time instruction text remains visible | 5 s |
+| Rest duration (d2) | Duration of blank screen | 120 s |
+| Variant | `white` = white bg + black cross, `black` = black bg + white cross | white |
+| Cross size | Display size of cross (`vmin`) | 16 vmin |
+| Cross thickness | Cross stroke width (`px`) | 4 px |
+| Cursor | Whether the mouse pointer is hidden | hidden |
+
+All inputs are **validated** and **saved automatically** in the browser (localStorage), so the experimenter does not need to re-enter values across subjects.
+
+### Start the Task
+Press the **Start** button — the sequence opens in the same window.
 
 ---
 
-## Debugging
+## Runner Page (run.html)
 
-Open **DevTools → Console** to watch the timer:
+`index.html` receives configuration values from `landing.html` automatically and runs the sequence in fullscreen mode.
 
-```
-[rest] phase=1 (fixation), elapsed=12s, remaining=138s
-```
+### Console Debug Timer
 
-This confirms timing is progressing as expected.
+A timestamped log prints once per second for monitoring / protocol verification:
+
+[rest] phase=1 (fixation), elapsed=32s, remaining=118s
+
+yaml
+Copy code
+
+Good for experimenter tracking; safe for participant use (no visual timer appears).
 
 ---
+
+## URL Parameters (automatically generated — no need to edit manually)
+
+| Parameter | Meaning |
+|----------|---------|
+| `d1` | Fixation duration (seconds) |
+| `inter` | Interval text duration (seconds) |
+| `d2` | Blank screen duration (seconds) |
+| `variant` | `white` or `black` |
+| `size` | Cross size in vmin |
+| `thickness` | Cross stroke width (px) |
+| `cursor` | `none` or `auto` |
+
+---
+
+## Fullscreen Notes
+
+- Fullscreen activates automatically.
+- Some browsers require the first click or keypress — this is already handled by the code.
+
+---
+
+## Recommended Usage Workflow
+
+1. Open the **landing page** (`landnig.html`) in the experiment browser.
+2. Set durations and visual variant.
+3. Click **Start**.
+4. Let the participant perform the resting-state task.
+5. Monitor progress via the console timer (optional).
+
+---
+
+## License
+You are free to use, modify, and integrate this into any study.
