@@ -99,7 +99,7 @@
 
   <script>
     const KEY = 'rest-landing-v1';
-    const DEFAULTS = { d1:150, inter:5, d2:120, variant:'white', size:16, thickness:4, cursor:'none' };
+    const DEFAULTS = { d1:150, inter:5, d2:150, variant:'white', size:10, thickness:4, cursor:'none' };
 
     function load() {
       try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY)) }; }
