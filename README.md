@@ -30,8 +30,7 @@ index.html → Runner page (displays the timed sequence)
 cross.png → Optional cross image asset (not required by the default renderer)
 README.md → Documentation (this file)
 
-yaml
-Copy code
+
 
 ---
 
@@ -66,8 +65,7 @@ A timestamped log prints once per second for monitoring / protocol verification:
 
 [rest] phase=1 (fixation), elapsed=32s, remaining=118s
 
-yaml
-Copy code
+
 
 Good for experimenter tracking; safe for participant use (no visual timer appears).
 
