@@ -42,9 +42,9 @@ The landing page lets you configure:
 |--------|-------------|---------|
 | Fixation duration (d1) | Duration of cross display | 150 s |
 | Interval duration (inter) | Time instruction text remains visible | 5 s |
-| Rest duration (d2) | Duration of blank screen | 120 s |
+| Rest duration (d2) | Duration of blank screen | 150 s |
 | Variant | `white` = white bg + black cross, `black` = black bg + white cross | white |
-| Cross size | Display size of cross (`vmin`) | 16 vmin |
+| Cross size | Display size of cross (`vmin`) | 10 vmin |
 | Cross thickness | Cross stroke width (`px`) | 4 px |
 | Cursor | Whether the mouse pointer is hidden | hidden |
 
