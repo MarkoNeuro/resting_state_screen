@@ -25,9 +25,9 @@ The entire flow runs **automatically** once started.
 
 ## Files
 
-landing.html → Landing page (configuration UI)
-index.html → Runner page (displays the timed sequence)
-cross.png → Optional cross image asset (not required by the default renderer)
+landing.html → Landing page (configuration UI),
+index.html → Runner page (displays the timed sequence),
+cross.png → Optional cross image asset (not required by the default renderer),
 README.md → Documentation (this file)
 
 
