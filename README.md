@@ -34,7 +34,7 @@ README.md → Documentation (this file)
 
 ---
 
-## Landing Page (index.html)
+## Landing Page (landing.html)
 
 The landing page lets you configure:
 
@@ -55,7 +55,7 @@ Press the **Start** button — the sequence opens in the same window.
 
 ---
 
-## Runner Page (run.html)
+## Runner Page (index.html)
 
 `index.html` receives configuration values from `landing.html` automatically and runs the sequence in fullscreen mode.
 
