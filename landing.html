@@ -93,13 +93,49 @@
         </select>
       </div>
 
+      <div class="row full">
+        <label for="triggerUrl">Trigger Server URL</label>
+        <input id="triggerUrl" type="url" required>
+        <div class="error" id="err_triggerUrl">Enter a valid URL</div>
+      </div>
+
+      <div class="row">
+        <label for="triggerStart">Trigger: Timer Start (0-255)</label>
+        <input id="triggerStart" type="number" min="0" max="255" step="1" required>
+        <div class="error" id="err_triggerStart">Enter an integer from 0 to 255</div>
+      </div>
+
+      <div class="row">
+        <label for="triggerEyesClosed">Trigger: Eyes-Closed Start (0-255)</label>
+        <input id="triggerEyesClosed" type="number" min="0" max="255" step="1" required>
+        <div class="error" id="err_triggerEyesClosed">Enter an integer from 0 to 255</div>
+      </div>
+
+      <div class="row full">
+        <label for="triggerEnd">Trigger: Rest End (0-255)</label>
+        <input id="triggerEnd" type="number" min="0" max="255" step="1" required>
+        <div class="error" id="err_triggerEnd">Enter an integer from 0 to 255</div>
+      </div>
+
       <button type="submit">Start</button>
     </form>
   </div>
 
   <script>
     const KEY = 'rest-landing-v1';
-    const DEFAULTS = { d1:150, inter:5, d2:150, variant:'white', size:10, thickness:4, cursor:'none' };
+    const DEFAULTS = {
+      d1:150,
+      inter:5,
+      d2:150,
+      variant:'white',
+      size:10,
+      thickness:4,
+      cursor:'none',
+      triggerUrl:'http://127.0.0.1:5001/set_data',
+      triggerStart:1,
+      triggerEyesClosed:2,
+      triggerEnd:3
+    };
 
     function load() {
       try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY)) }; }
@@ -110,6 +146,10 @@
     const s = load();
     d1.value=s.d1; inter.value=s.inter; d2.value=s.d2;
     variant.value=s.variant; size.value=s.size; thickness.value=s.thickness; cursor.value=s.cursor;
+    triggerUrl.value=s.triggerUrl;
+    triggerStart.value=s.triggerStart;
+    triggerEyesClosed.value=s.triggerEyesClosed;
+    triggerEnd.value=s.triggerEnd;
 
     function validate() {
       let ok = true;
@@ -119,15 +159,31 @@
       if(d2.value<=0){ok=false;show('err_d2',true);} else show('err_d2',false);
       if(size.value<=0){ok=false;show('err_size',true);} else show('err_size',false);
       if(thickness.value<=0){ok=false;show('err_thickness',true);} else show('err_thickness',false);
+      if(!triggerUrl.value || !/^https?:\/\//i.test(triggerUrl.value)){ok=false;show('err_triggerUrl',true);} else show('err_triggerUrl',false);
+      if(!Number.isInteger(+triggerStart.value) || +triggerStart.value < 0 || +triggerStart.value > 255){ok=false;show('err_triggerStart',true);} else show('err_triggerStart',false);
+      if(!Number.isInteger(+triggerEyesClosed.value) || +triggerEyesClosed.value < 0 || +triggerEyesClosed.value > 255){ok=false;show('err_triggerEyesClosed',true);} else show('err_triggerEyesClosed',false);
+      if(!Number.isInteger(+triggerEnd.value) || +triggerEnd.value < 0 || +triggerEnd.value > 255){ok=false;show('err_triggerEnd',true);} else show('err_triggerEnd',false);
       return ok;
     }
 
     cfg.addEventListener('submit', e=>{
       e.preventDefault();
       if(!validate()) return;
-      const v={d1:+d1.value, inter:+inter.value, d2:+d2.value, variant:variant.value, size:+size.value, thickness:+thickness.value, cursor:cursor.value};
+      const v={
+        d1:+d1.value,
+        inter:+inter.value,
+        d2:+d2.value,
+        variant:variant.value,
+        size:+size.value,
+        thickness:+thickness.value,
+        cursor:cursor.value,
+        triggerUrl:triggerUrl.value.trim(),
+        triggerStart:+triggerStart.value,
+        triggerEyesClosed:+triggerEyesClosed.value,
+        triggerEnd:+triggerEnd.value
+      };
       save(v);
-      const url=`./index.html?d1=${v.d1}&inter=${v.inter}&d2=${v.d2}&variant=${v.variant}&size=${v.size}&thickness=${v.thickness}&cursor=${v.cursor}`;
+      const url=`./index.html?d1=${v.d1}&inter=${v.inter}&d2=${v.d2}&variant=${v.variant}&size=${v.size}&thickness=${v.thickness}&cursor=${v.cursor}&triggerUrl=${encodeURIComponent(v.triggerUrl)}&triggerStart=${v.triggerStart}&triggerEyesClosed=${v.triggerEyesClosed}&triggerEnd=${v.triggerEnd}`;
       window.location.href = url;
     });
   </script>

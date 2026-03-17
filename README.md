@@ -82,6 +82,22 @@ Good for experimenter tracking; safe for participant use (no visual timer appear
 | `size` | Cross size in vmin |
 | `thickness` | Cross stroke width (px) |
 | `cursor` | `none` or `auto` |
+| `triggerUrl` | Trigger server endpoint (default `http://127.0.0.1:5001/set_data`) |
+| `triggerStart` | Trigger value at protocol/timer start (default `1`) |
+| `triggerEyesClosed` | Trigger value when eyes-closed blank segment starts (default `2`) |
+| `triggerEnd` | Trigger value when rest timer ends (default `3`) |
+
+### EEG Trigger Integration
+
+The runner sends HTTP POST trigger events to your EEG trigger server (`/set_data`) with payload:
+
+`{"trigger_value": <int>}`
+
+By default, three trigger events are emitted:
+
+1. **Timer start** (start of fixation phase) → value `1`
+2. **Eyes-closed segment start** (start of blank/rest phase) → value `2`
+3. **Rest timer end** (right before `END` screen) → value `3`
 
 ---
 

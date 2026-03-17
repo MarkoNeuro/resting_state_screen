@@ -52,6 +52,12 @@
         const v = parseFloat(params.get(key));
         return Number.isFinite(v) && v >= 0 ? v : def;
       };
+      const getInt = (key, def) => {
+        const raw = params.get(key);
+        if (raw == null || raw === '') return def;
+        const v = parseInt(raw, 10);
+        return Number.isInteger(v) ? v : def;
+      };
 
       // Variant + visuals
       const variant = (params.get('variant') || 'white').toLowerCase();
@@ -82,6 +88,29 @@
       const d1 = getNum('d1', 150);
       const inter = getNum('inter', 5);
       const d2 = getNum('d2', 120);
+
+      // Trigger settings
+      const triggerUrl = params.get('triggerUrl') || 'http://127.0.0.1:5001/set_data';
+      const triggerAtStart = getInt('triggerStart', 1);
+      const triggerAtEyesClosedStart = getInt('triggerEyesClosed', 2);
+      const triggerAtRestEnd = getInt('triggerEnd', 3);
+
+      async function sendTrigger(triggerValue, label) {
+        try {
+          const res = await fetch(triggerUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ trigger_value: triggerValue })
+          });
+          if (!res.ok) {
+            console.warn(`[rest][trigger] Failed (${label}) status=${res.status}`);
+            return;
+          }
+          console.log(`[rest][trigger] Sent (${label}) value=${triggerValue}`);
+        } catch (err) {
+          console.warn(`[rest][trigger] Error (${label}):`, err);
+        }
+      }
 
       // Elements
       const stage   = document.querySelector('.stage');
@@ -114,6 +143,7 @@
         // Phase 1: Fixation
         showFixation();
         phase = 1; phaseStart = performance.now(); phaseDur = d1*1000;
+        await sendTrigger(triggerAtStart, 'timer-start');
         await sleep(phaseDur);
 
         // Phase 2: Interval text
@@ -124,9 +154,11 @@
         // Phase 3: Blank
         showBlank();
         phase = 3; phaseStart = performance.now(); phaseDur = d2*1000;
+        await sendTrigger(triggerAtEyesClosedStart, 'eyes-closed-start');
         await sleep(phaseDur);
 
         // Phase 4: END + exit FS
+        await sendTrigger(triggerAtRestEnd, 'rest-timer-end');
         showMessage('END');
         phase = 4; phaseStart = performance.now(); phaseDur = 0;
         if (document.fullscreenElement && document.exitFullscreen) {
